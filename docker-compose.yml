@@ -1,0 +1,54 @@
+ 
+version: "3"
+services: 
+  react-app:
+    image: react-app
+    container_name: react-app
+    restart: unless-stopped
+    build: ./client/
+    ports:
+      - 3000:3000
+    networks:
+      - mern-app
+    volumes:
+      - ./client/:/usr/app
+      - /usr/app/node_module
+    depends_on: 
+      - api-server
+
+  api-server:
+    image: api-server
+    container_name: api-server
+    restart: unless-stopped
+    build: ./server/
+    ports:
+      - 3600:3600
+    networks:
+      - mern-app
+    volumes:
+      - ./server/:/usr/app
+      - /usr/app/node_module
+    depends_on:
+      - db
+    env_file: .env
+
+  db:
+    image: mongo
+    container_name: db
+    restart: unless-stopped
+    env_file: .env
+    ports: 
+      - 27016:27017
+
+    networks:
+      - mern-app
+    volumes:
+      - mongo-data:/data/db
+    env_file: .env
+networks:
+  mern-app:
+    driver: bridge
+
+volumes:
+  mongo-data:
+    driver: local
